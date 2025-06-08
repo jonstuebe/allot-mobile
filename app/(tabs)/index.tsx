@@ -1,75 +1,184 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import { centsToDollars, dollarsToCents } from "@/utils/currency";
+import { faker } from "@faker-js/faker";
+import { Stack } from "expo-router";
+import React, { useState } from "react";
+import { View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import {
+  ListContainer,
+  PressableOpacity,
+  RowContent,
+  RowLabel,
+  RowTrailing,
+  SectionContainer,
+  SectionContent,
+  SwipeableRowContainer,
+  Typography,
+  spacing,
+  useTheme,
+} from "react-native-orchard";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+type Bill = {
+  id: string;
+  name: string;
+  amount: number;
+  dueDate: string;
+};
 
-export default function HomeScreen() {
+// Generate 20 fake bills
+const mockBills: Bill[] = Array.from({ length: 20 }, () => ({
+  id: faker.string.uuid(),
+  name: faker.helpers.arrayElement([
+    "Rent",
+    "Electricity",
+    "Internet",
+    "Water",
+    "Gas",
+    "Phone",
+    "Car Insurance",
+    "Health Insurance",
+    "Gym Membership",
+    "Netflix",
+    "Spotify",
+    "Amazon Prime",
+    "Car Payment",
+    "Student Loan",
+    "Credit Card",
+  ]),
+  amount: dollarsToCents(faker.number.int({ min: 20, max: 2000 })),
+  dueDate: faker.date.future().toISOString().split("T")[0],
+}));
+
+// Sort bills by due date
+mockBills.sort(
+  (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+);
+
+export default function BillsScreen() {
+  const { colors } = useTheme();
+  const [bills, setBills] = useState<Bill[]>(mockBills);
+
+  const deleteBill = (bill: Bill) => {
+    setBills((currentBills) => currentBills.filter((b) => b.id !== bill.id));
+  };
+
+  const addBill = () => {
+    const newBill: Bill = {
+      id: faker.string.uuid(),
+      name: faker.helpers.arrayElement([
+        "Rent",
+        "Electricity",
+        "Internet",
+        "Water",
+        "Gas",
+        "Phone",
+        "Car Insurance",
+        "Health Insurance",
+        "Gym Membership",
+        "Netflix",
+        "Spotify",
+        "Amazon Prime",
+        "Car Payment",
+        "Student Loan",
+        "Credit Card",
+      ]),
+      amount: dollarsToCents(faker.number.int({ min: 20, max: 2000 })),
+      dueDate: faker.date.future().toISOString().split("T")[0],
+    };
+    setBills((currentBills) =>
+      [...currentBills, newBill].sort(
+        (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+      )
+    );
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <>
+      <Stack.Screen
+        options={{
+          title: "Bills",
+          headerRight: () => (
+            <PressableOpacity
+              onPress={addBill}
+              style={{
+                padding: spacing.lg,
+              }}
+            >
+              <IconSymbol
+                name="plus.circle.fill"
+                size={24}
+                color={colors.blue}
+              />
+            </PressableOpacity>
+          ),
+        }}
+      />
+      <View
+        style={{
+          flex: 1,
+        }}
+      >
+        <ScrollView
+          style={{
+            flex: 1,
+            position: "relative",
+          }}
+          contentContainerStyle={{
+            marginTop: spacing.lg,
+            // please adjust this to add padding based on the height of the tab bar
+            // this is a hacky way to do it, but it works for now
+            paddingBottom: 100,
+          }}
+        >
+          <ListContainer>
+            <SectionContainer>
+              <SectionContent>
+                {bills.map((bill) => (
+                  <SwipeableRowContainer
+                    key={bill.id}
+                    overshootRight={false}
+                    overshootLeft={false}
+                    renderRightActions={(prog, drag, actions) => (
+                      <PressableOpacity
+                        onPress={() => {
+                          actions.close();
+                          deleteBill(bill);
+                        }}
+                        style={{
+                          backgroundColor: colors.red,
+                          justifyContent: "center",
+                          paddingHorizontal: spacing.lg,
+                        }}
+                      >
+                        <Typography
+                          variant="bodyRegular"
+                          color="white"
+                          style={{ fontWeight: "500" }}
+                        >
+                          Delete
+                        </Typography>
+                      </PressableOpacity>
+                    )}
+                  >
+                    <RowContent>
+                      <RowLabel variant="title">{bill.name}</RowLabel>
+                      <RowLabel variant="subtitle">
+                        Due {new Date(bill.dueDate).toLocaleDateString()}
+                      </RowLabel>
+                    </RowContent>
+                    <RowTrailing>
+                      <Typography variant="bodyRegular" color="labelPrimary">
+                        {centsToDollars(bill.amount)}
+                      </Typography>
+                    </RowTrailing>
+                  </SwipeableRowContainer>
+                ))}
+              </SectionContent>
+            </SectionContainer>
+          </ListContainer>
+        </ScrollView>
+      </View>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
