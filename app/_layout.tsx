@@ -14,6 +14,32 @@ export default function RootLayout() {
       <ThemeProvider value={theme[mode]}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="bills/new"
+            options={{
+              headerShown: false,
+              presentation: "formSheet",
+              animation: "slide_from_bottom",
+              gestureDirection: "vertical",
+              sheetAllowedDetents: [0.5, 1],
+              sheetInitialDetentIndex: 0,
+              sheetGrabberVisible: true,
+              sheetCornerRadius: 10,
+            }}
+          />
+          <Stack.Screen
+            name="paychecks/new"
+            options={{
+              headerShown: false,
+              presentation: "formSheet",
+              animation: "slide_from_bottom",
+              gestureDirection: "vertical",
+              sheetAllowedDetents: [0.5, 1],
+              sheetInitialDetentIndex: 0,
+              sheetGrabberVisible: true,
+              sheetCornerRadius: 10,
+            }}
+          />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />

@@ -1,8 +1,8 @@
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { centsToDollars, dollarsToCents } from "@/utils/currency";
 import { faker } from "@faker-js/faker";
-import { Stack } from "expo-router";
-import React, { useState } from "react";
+import { Stack, useRouter } from "expo-router";
+import { useState } from "react";
 import { View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import {
@@ -57,41 +57,42 @@ mockBills.sort(
 
 export default function BillsScreen() {
   const { colors } = useTheme();
+  const router = useRouter();
   const [bills, setBills] = useState<Bill[]>(mockBills);
 
   const deleteBill = (bill: Bill) => {
     setBills((currentBills) => currentBills.filter((b) => b.id !== bill.id));
   };
 
-  const addBill = () => {
-    const newBill: Bill = {
-      id: faker.string.uuid(),
-      name: faker.helpers.arrayElement([
-        "Rent",
-        "Electricity",
-        "Internet",
-        "Water",
-        "Gas",
-        "Phone",
-        "Car Insurance",
-        "Health Insurance",
-        "Gym Membership",
-        "Netflix",
-        "Spotify",
-        "Amazon Prime",
-        "Car Payment",
-        "Student Loan",
-        "Credit Card",
-      ]),
-      amount: dollarsToCents(faker.number.int({ min: 20, max: 2000 })),
-      dueDate: faker.date.future().toISOString().split("T")[0],
-    };
-    setBills((currentBills) =>
-      [...currentBills, newBill].sort(
-        (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
-      )
-    );
-  };
+  // const addBill = () => {
+  //   const newBill: Bill = {
+  //     id: faker.string.uuid(),
+  //     name: faker.helpers.arrayElement([
+  //       "Rent",
+  //       "Electricity",
+  //       "Internet",
+  //       "Water",
+  //       "Gas",
+  //       "Phone",
+  //       "Car Insurance",
+  //       "Health Insurance",
+  //       "Gym Membership",
+  //       "Netflix",
+  //       "Spotify",
+  //       "Amazon Prime",
+  //       "Car Payment",
+  //       "Student Loan",
+  //       "Credit Card",
+  //     ]),
+  //     amount: dollarsToCents(faker.number.int({ min: 20, max: 2000 })),
+  //     dueDate: faker.date.future().toISOString().split("T")[0],
+  //   };
+  //   setBills((currentBills) =>
+  //     [...currentBills, newBill].sort(
+  //       (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+  //     )
+  //   );
+  // };
 
   return (
     <>
@@ -100,7 +101,7 @@ export default function BillsScreen() {
           title: "Bills",
           headerRight: () => (
             <PressableOpacity
-              onPress={addBill}
+              onPress={() => router.push("/bills/new")}
               style={{
                 padding: spacing.lg,
               }}
