@@ -5,16 +5,17 @@ import { Stack, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import {
   ListContainer,
   PressableOpacity,
+  RowContainer,
   RowContent,
   RowLabel,
   RowTrailing,
   SectionContainer,
   SectionContent,
   SectionHeader,
-  SwipeableRowContainer,
   Typography,
   spacing,
   useTheme,
@@ -156,7 +157,7 @@ export default function PaychecksScreen() {
                 <SectionHeader>{month}</SectionHeader>
                 <SectionContent>
                   {monthPaychecks.map((paycheck) => (
-                    <SwipeableRowContainer
+                    <Swipeable
                       key={paycheck.id}
                       overshootRight={false}
                       overshootLeft={false}
@@ -182,23 +183,37 @@ export default function PaychecksScreen() {
                         </PressableOpacity>
                       )}
                     >
-                      <RowContent>
-                        <RowLabel variant="title">
-                          {new Date(paycheck.dateReceived).toLocaleDateString()}
-                        </RowLabel>
-                        <RowLabel variant="subtitle">
-                          Next:{" "}
-                          {new Date(
-                            paycheck.nextPaycheckDate
-                          ).toLocaleDateString()}
-                        </RowLabel>
-                      </RowContent>
-                      <RowTrailing>
-                        <Typography variant="bodyRegular" color="labelPrimary">
-                          {centsToDollars(paycheck.amount)}
-                        </Typography>
-                      </RowTrailing>
-                    </SwipeableRowContainer>
+                      <PressableOpacity
+                        onPress={() => router.push(`/paychecks/${paycheck.id}`)}
+                        style={{
+                          flex: 1,
+                        }}
+                      >
+                        <RowContainer rounded={false}>
+                          <RowContent>
+                            <RowLabel variant="title">
+                              {new Date(
+                                paycheck.dateReceived
+                              ).toLocaleDateString()}
+                            </RowLabel>
+                            <RowLabel variant="subtitle">
+                              Next:{" "}
+                              {new Date(
+                                paycheck.nextPaycheckDate
+                              ).toLocaleDateString()}
+                            </RowLabel>
+                          </RowContent>
+                          <RowTrailing>
+                            <Typography
+                              variant="bodyRegular"
+                              color="labelPrimary"
+                            >
+                              {centsToDollars(paycheck.amount)}
+                            </Typography>
+                          </RowTrailing>
+                        </RowContainer>
+                      </PressableOpacity>
+                    </Swipeable>
                   ))}
                 </SectionContent>
               </SectionContainer>

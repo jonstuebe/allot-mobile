@@ -41,6 +41,13 @@ export default function RootLayout() {
               sheetCornerRadius: 10,
             }}
           />
+          <Stack.Screen
+            name="paychecks/[id]"
+            options={{
+              title: "Paycheck Details",
+              headerShown: true,
+            }}
+          />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />
