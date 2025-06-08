@@ -28,13 +28,13 @@ export default function NewBill() {
             <RowContainer>
               <RowLabel>Name</RowLabel>
               <RowTrailing>
-                <RowTextInput placeholder="Enter bill name" />
+                <RowTextInput placeholder="Enter Name" />
               </RowTrailing>
             </RowContainer>
             <RowContainer>
               <RowLabel>Amount</RowLabel>
               <RowTrailing>
-                <RowTextInput placeholder="Enter bill amount" />
+                <RowTextInput placeholder="Enter Amount" />
               </RowTrailing>
             </RowContainer>
             <RowContainer>

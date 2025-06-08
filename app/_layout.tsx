@@ -30,8 +30,9 @@ export default function RootLayout() {
           <Stack.Screen
             name="paychecks/new"
             options={{
-              headerShown: false,
-              presentation: "formSheet",
+              title: "New Paycheck",
+              headerShown: true,
+              presentation: "modal",
               animation: "slide_from_bottom",
               gestureDirection: "vertical",
               sheetAllowedDetents: [0.5, 1],

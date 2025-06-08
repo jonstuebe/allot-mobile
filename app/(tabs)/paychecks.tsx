@@ -1,8 +1,8 @@
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { centsToDollars, dollarsToCents } from "@/utils/currency";
 import { faker } from "@faker-js/faker";
-import { Stack } from "expo-router";
-import React, { useMemo, useState } from "react";
+import { Stack, useRouter } from "expo-router";
+import { useMemo, useState } from "react";
 import { View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import {
@@ -58,6 +58,7 @@ mockPaychecks.sort(
 );
 
 export default function PaychecksScreen() {
+  const router = useRouter();
   const { colors } = useTheme();
   const [paychecks, setPaychecks] = useState<Paycheck[]>(mockPaychecks);
 
@@ -67,26 +68,26 @@ export default function PaychecksScreen() {
     );
   };
 
-  const addPaycheck = () => {
-    const dateReceived = new Date();
-    const nextPaycheckDate = new Date(dateReceived);
-    nextPaycheckDate.setDate(nextPaycheckDate.getDate() + 14); // Assuming bi-weekly paychecks
+  // const addPaycheck = () => {
+  //   const dateReceived = new Date();
+  //   const nextPaycheckDate = new Date(dateReceived);
+  //   nextPaycheckDate.setDate(nextPaycheckDate.getDate() + 14); // Assuming bi-weekly paychecks
 
-    const newPaycheck: Paycheck = {
-      id: faker.string.uuid(),
-      amount: dollarsToCents(faker.number.int({ min: 1000, max: 5000 })),
-      dateReceived: dateReceived.toISOString().split("T")[0],
-      nextPaycheckDate: nextPaycheckDate.toISOString().split("T")[0],
-    };
+  //   const newPaycheck: Paycheck = {
+  //     id: faker.string.uuid(),
+  //     amount: dollarsToCents(faker.number.int({ min: 1000, max: 5000 })),
+  //     dateReceived: dateReceived.toISOString().split("T")[0],
+  //     nextPaycheckDate: nextPaycheckDate.toISOString().split("T")[0],
+  //   };
 
-    setPaychecks((currentPaychecks) =>
-      [newPaycheck, ...currentPaychecks].sort(
-        (a, b) =>
-          new Date(b.dateReceived).getTime() -
-          new Date(a.dateReceived).getTime()
-      )
-    );
-  };
+  //   setPaychecks((currentPaychecks) =>
+  //     [newPaycheck, ...currentPaychecks].sort(
+  //       (a, b) =>
+  //         new Date(b.dateReceived).getTime() -
+  //         new Date(a.dateReceived).getTime()
+  //     )
+  //   );
+  // };
 
   // Group paychecks by month
   const groupedPaychecks = useMemo(() => {
@@ -120,7 +121,7 @@ export default function PaychecksScreen() {
           title: "Paychecks",
           headerRight: () => (
             <PressableOpacity
-              onPress={addPaycheck}
+              onPress={() => router.push("/paychecks/new")}
               style={{
                 padding: spacing.lg,
               }}
