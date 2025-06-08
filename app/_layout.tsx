@@ -48,6 +48,13 @@ export default function RootLayout() {
               headerShown: true,
             }}
           />
+          <Stack.Screen
+            name="bills/[id]"
+            options={{
+              title: "Bill Details",
+              headerShown: true,
+            }}
+          />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />

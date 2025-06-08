@@ -127,11 +127,7 @@ export default function PaychecksScreen() {
                 padding: spacing.lg,
               }}
             >
-              <IconSymbol
-                name="plus.circle.fill"
-                size={24}
-                color={colors.blue}
-              />
+              <IconSymbol name="plus.circle" size={24} color={colors.blue} />
             </PressableOpacity>
           ),
         }}
@@ -185,9 +181,6 @@ export default function PaychecksScreen() {
                     >
                       <PressableOpacity
                         onPress={() => router.push(`/paychecks/${paycheck.id}`)}
-                        style={{
-                          flex: 1,
-                        }}
                       >
                         <RowContainer rounded={false}>
                           <RowContent>
@@ -210,6 +203,11 @@ export default function PaychecksScreen() {
                             >
                               {centsToDollars(paycheck.amount)}
                             </Typography>
+                            <IconSymbol
+                              name="chevron.right"
+                              size={16}
+                              color={colors.labelSecondary}
+                            />
                           </RowTrailing>
                         </RowContainer>
                       </PressableOpacity>

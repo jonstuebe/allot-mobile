@@ -5,15 +5,16 @@ import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import {
   ListContainer,
   PressableOpacity,
+  RowContainer,
   RowContent,
   RowLabel,
   RowTrailing,
   SectionContainer,
   SectionContent,
-  SwipeableRowContainer,
   Typography,
   spacing,
   useTheme,
@@ -106,11 +107,7 @@ export default function BillsScreen() {
                 padding: spacing.lg,
               }}
             >
-              <IconSymbol
-                name="plus.circle.fill"
-                size={24}
-                color={colors.blue}
-              />
+              <IconSymbol name="plus.circle" size={24} color={colors.blue} />
             </PressableOpacity>
           ),
         }}
@@ -136,7 +133,7 @@ export default function BillsScreen() {
             <SectionContainer>
               <SectionContent>
                 {bills.map((bill) => (
-                  <SwipeableRowContainer
+                  <Swipeable
                     key={bill.id}
                     overshootRight={false}
                     overshootLeft={false}
@@ -162,18 +159,32 @@ export default function BillsScreen() {
                       </PressableOpacity>
                     )}
                   >
-                    <RowContent>
-                      <RowLabel variant="title">{bill.name}</RowLabel>
-                      <RowLabel variant="subtitle">
-                        Due {new Date(bill.dueDate).toLocaleDateString()}
-                      </RowLabel>
-                    </RowContent>
-                    <RowTrailing>
-                      <Typography variant="bodyRegular" color="labelPrimary">
-                        {centsToDollars(bill.amount)}
-                      </Typography>
-                    </RowTrailing>
-                  </SwipeableRowContainer>
+                    <PressableOpacity
+                      onPress={() => router.push(`/bills/${bill.id}`)}
+                    >
+                      <RowContainer rounded={false}>
+                        <RowContent>
+                          <RowLabel variant="title">{bill.name}</RowLabel>
+                          <RowLabel variant="subtitle">
+                            Due {new Date(bill.dueDate).toLocaleDateString()}
+                          </RowLabel>
+                        </RowContent>
+                        <RowTrailing>
+                          <Typography
+                            variant="bodyRegular"
+                            color="labelPrimary"
+                          >
+                            {centsToDollars(bill.amount)}
+                          </Typography>
+                          <IconSymbol
+                            name="chevron.right"
+                            size={16}
+                            color={colors.labelSecondary}
+                          />
+                        </RowTrailing>
+                      </RowContainer>
+                    </PressableOpacity>
+                  </Swipeable>
                 ))}
               </SectionContent>
             </SectionContainer>
