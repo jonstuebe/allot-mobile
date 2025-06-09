@@ -1,74 +1,38 @@
-import DateTimePicker from "@react-native-community/datetimepicker";
-import SegmentedControl from "@react-native-segmented-control/segmented-control";
+import { BillForm, type BillFormSchema } from "@/components/forms/BillForm";
+import { addBill } from "@/state/crud";
+import { dollarsToCents } from "@/utils/currency";
+import { getDate, getDayOfYear } from "date-fns";
+import { useNavigation } from "expo-router";
 import {
-  ListContainer,
-  RowContainer,
-  RowLabel,
-  RowSwitch,
-  RowTextInput,
-  RowTrailing,
-  SectionContainer,
-  SectionContent,
   SheetHeaderCloseButton,
   SheetHeaderContainer,
-  useTheme,
 } from "react-native-orchard";
 
 export default function NewBill() {
-  const { spacing } = useTheme();
+  const navigation = useNavigation();
+
+  const onSubmit = (data: BillFormSchema) => {
+    addBill({
+      name: data.name,
+      amount: dollarsToCents(data.amount),
+      autoPay: data.autoPay,
+      due: {
+        type: data.dueEvery,
+        index:
+          data.dueEvery === "monthly"
+            ? getDate(data.dueDate)
+            : getDayOfYear(data.dueDate),
+      },
+    });
+    navigation.goBack();
+  };
 
   return (
     <>
       <SheetHeaderContainer>
         <SheetHeaderCloseButton />
       </SheetHeaderContainer>
-      <ListContainer>
-        <SectionContainer>
-          <SectionContent>
-            <RowContainer>
-              <RowLabel>Name</RowLabel>
-              <RowTrailing>
-                <RowTextInput placeholder="Enter Name" />
-              </RowTrailing>
-            </RowContainer>
-            <RowContainer>
-              <RowLabel>Amount</RowLabel>
-              <RowTrailing>
-                <RowTextInput placeholder="Enter Amount" />
-              </RowTrailing>
-            </RowContainer>
-            <RowContainer>
-              <RowLabel>Auto Pay</RowLabel>
-              <RowTrailing>
-                <RowSwitch />
-              </RowTrailing>
-            </RowContainer>
-            <RowContainer>
-              <RowLabel>Due Every</RowLabel>
-              <RowTrailing>
-                <SegmentedControl
-                  values={["Monthly", "Yearly"]}
-                  selectedIndex={0}
-                  style={{ flex: 1, marginVertical: -1 * spacing.xs }}
-                />
-              </RowTrailing>
-            </RowContainer>
-            <RowContainer>
-              <RowLabel>Due Date</RowLabel>
-              <RowTrailing>
-                <DateTimePicker
-                  value={new Date()}
-                  mode="date"
-                  display="compact"
-                  style={{
-                    marginVertical: -1 * spacing.xs,
-                  }}
-                />
-              </RowTrailing>
-            </RowContainer>
-          </SectionContent>
-        </SectionContainer>
-      </ListContainer>
+      <BillForm onSubmit={onSubmit} />
     </>
   );
 }

@@ -1,30 +1,61 @@
-import { useLocalSearchParams } from "expo-router";
+import { BillForm, type BillFormSchema } from "@/components/forms/BillForm";
+import { updateBill } from "@/state/crud";
+import { centsToDollars, dollarsToCents } from "@/utils/currency";
+import { use$ } from "@legendapp/state/react";
+import { getDate, getDayOfYear, setDate, setDayOfYear } from "date-fns";
+import { Stack, useLocalSearchParams, useNavigation } from "expo-router";
 import { ScrollView } from "react-native-gesture-handler";
-import {
-  ListContainer,
-  RowContainer,
-  RowLabel,
-  SectionContainer,
-  SectionContent,
-  useTheme,
-} from "react-native-orchard";
+import { Typography, useTheme } from "react-native-orchard";
+import { appState$ } from "../../state/app";
 
 export default function BillPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { spacing } = useTheme();
+  const navigation = useNavigation();
+  const bill = use$(appState$.bills.get().find((b) => b.id === id));
+
+  const onSubmit = (data: BillFormSchema) => {
+    updateBill(id, {
+      name: data.name,
+      amount: dollarsToCents(data.amount),
+      autoPay: data.autoPay,
+      due: {
+        type: data.dueEvery,
+        index:
+          data.dueEvery === "monthly"
+            ? getDate(data.dueDate)
+            : getDayOfYear(data.dueDate),
+      },
+    });
+    navigation.goBack();
+  };
+
+  if (!bill) {
+    return <Typography>Bill not found</Typography>;
+  }
 
   return (
     <>
-      <ScrollView>
-        <ListContainer style={{ marginTop: spacing.lg }}>
-          <SectionContainer>
-            <SectionContent>
-              <RowContainer>
-                <RowLabel>Name</RowLabel>
-              </RowContainer>
-            </SectionContent>
-          </SectionContainer>
-        </ListContainer>
+      <Stack.Screen
+        options={{
+          headerBackTitle: "Bills",
+        }}
+      />
+      <ScrollView contentContainerStyle={{ paddingTop: spacing.lg }}>
+        <BillForm
+          defaultValues={{
+            name: bill.name,
+            amount: centsToDollars(bill.amount).toFixed(2),
+            autoPay: bill.autoPay,
+            dueEvery: bill.due.type,
+            dueDate:
+              bill.due.type === "monthly"
+                ? setDate(new Date(), bill.due.index)
+                : setDayOfYear(new Date(), bill.due.index),
+          }}
+          onSubmit={onSubmit}
+          submitLabel="Save"
+        />
       </ScrollView>
     </>
   );

@@ -1,6 +1,8 @@
 import {
-  isSameMonth,
-  isSameYear,
+  addMonths,
+  addYears,
+  getDaysInMonth,
+  getDaysInYear,
   isWithinInterval,
   setDate,
   setDayOfYear,
@@ -10,6 +12,43 @@ import * as Crypto from "expo-crypto";
 import type { Bill, Paycheck } from "./types";
 
 /**
+ * Gets the next due date of a bill. Should only used outside of the context of a paycheck.
+ *
+ * @param bill - The bill to get the next due date for.
+ * @returns The next due date of the bill. If the bill is not due on the given date, returns undefined.
+ */
+export function getNextBillDueDate(bill: Bill, date = new Date()): Date {
+  switch (bill.due.type) {
+    case "monthly":
+      if (bill.due.index > getDaysInMonth(date)) {
+        return setDate(date, bill.due.index);
+      } else {
+        return addMonths(setDate(date, bill.due.index), 1);
+      }
+    case "yearly":
+      if (bill.due.index > getDaysInYear(date)) {
+        return setDayOfYear(date, bill.due.index);
+      } else {
+        return addYears(setDayOfYear(date, bill.due.index), 1);
+      }
+  }
+}
+
+/**
+ * Gets the due date of a bill for a given paycheck.
+ *
+ * @param bill - The bill to get the due date for.
+ * @param paycheck - The paycheck to get the due date for.
+ * @returns The due date of the bill for the given paycheck.
+ */
+export function getBillDueDate(
+  bill: Bill,
+  paycheck: Paycheck
+): Date | undefined {
+  return getNextBillDueDate(bill, paycheck.dateReceived);
+}
+
+/**
  * Checks if a bill is due on a given paycheck date.
  *
  * @param bill - The bill to check.
@@ -17,23 +56,10 @@ import type { Bill, Paycheck } from "./types";
  * @returns True if the bill is due during the duration of the paycheck.
  */
 export function isMatchingBill(bill: Bill, paycheck: Paycheck): boolean {
-  let dueDate: Date;
+  const dueDate = getBillDueDate(bill, paycheck);
 
-  switch (bill.due.type) {
-    case "monthly":
-      if (isSameMonth(paycheck.dateReceived, paycheck.nextPaycheckDate)) {
-        dueDate = setDate(paycheck.dateReceived, bill.due.index);
-      } else {
-        dueDate = setDate(paycheck.nextPaycheckDate, bill.due.index);
-      }
-      break;
-    case "yearly":
-      if (isSameYear(paycheck.dateReceived, paycheck.nextPaycheckDate)) {
-        dueDate = setDayOfYear(paycheck.dateReceived, bill.due.index);
-      } else {
-        dueDate = setDayOfYear(paycheck.nextPaycheckDate, bill.due.index);
-      }
-      break;
+  if (!dueDate) {
+    return false;
   }
 
   return isWithinInterval(dueDate, {

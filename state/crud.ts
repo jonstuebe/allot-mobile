@@ -10,17 +10,23 @@ export function addBill(bill: Omit<Bill, "id">) {
 }
 
 export function removeBill(id: string) {
-  appState$.bills.filter((bill) => (bill.id as unknown as string) !== id);
+  appState$.bills.set(
+    appState$.bills
+      .peek()
+      .filter((bill) => (bill.id as unknown as string) !== id)
+  );
 }
 
 export function updateBill(id: string, updates: Partial<Bill>) {
-  appState$.bills.map((bill) => {
-    if ((bill.id as unknown as string) === id) {
-      return { ...bill, ...updates };
-    }
+  appState$.bills.set(
+    appState$.bills.peek().map((bill) => {
+      if ((bill.id as unknown as string) === id) {
+        return { ...bill, ...updates };
+      }
 
-    return bill;
-  });
+      return bill;
+    })
+  );
 }
 
 export function addPaycheck(paycheck: Omit<Paycheck, "id">) {
@@ -34,19 +40,23 @@ export function addPaycheck(paycheck: Omit<Paycheck, "id">) {
 }
 
 export function removePaycheck(id: string) {
-  appState$.paychecks.filter(
-    (paycheck) => (paycheck.id as unknown as string) !== id
+  appState$.paychecks.set(
+    appState$.paychecks
+      .peek()
+      .filter((paycheck) => (paycheck.id as unknown as string) !== id)
   );
 }
 
 export function updatePaycheck(id: string, updates: Partial<Paycheck>) {
-  appState$.paychecks.map((paycheck) => {
-    if ((paycheck.id as unknown as string) === id) {
-      return { ...paycheck, ...updates };
-    }
+  appState$.paychecks.set(
+    appState$.paychecks.peek().map((paycheck) => {
+      if ((paycheck.id as unknown as string) === id) {
+        return { ...paycheck, ...updates };
+      }
 
-    return paycheck;
-  });
+      return paycheck;
+    })
+  );
 }
 
 export function refreshPaycheckBills(paycheck: Paycheck) {

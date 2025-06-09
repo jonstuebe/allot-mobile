@@ -1,8 +1,7 @@
 import { observable } from "@legendapp/state";
-import { ObservablePersistMMKV } from "@legendapp/state/persist-plugins/mmkv";
-import { syncObservable } from "@legendapp/state/sync";
 
 import type { Bill, Paycheck } from "./types";
+import { id } from "./utils";
 
 export type AppState = {
   bills: Bill[];
@@ -10,13 +9,28 @@ export type AppState = {
 };
 
 export const appState$ = observable<AppState>({
-  bills: [],
+  bills: [
+    {
+      id: id(),
+      name: "Rent",
+      amount: 1_995,
+      due: { type: "monthly", index: 1 },
+      autoPay: false,
+    },
+    {
+      id: id(),
+      name: "Electricity",
+      amount: 100,
+      due: { type: "monthly", index: 1 },
+      autoPay: false,
+    },
+  ],
   paychecks: [],
 });
 
-syncObservable(appState$, {
-  persist: {
-    name: "app",
-    plugin: ObservablePersistMMKV,
-  },
-});
+// syncObservable(appState$, {
+//   persist: {
+//     name: "app",
+//     plugin: ObservablePersistMMKV,
+//   },
+// });

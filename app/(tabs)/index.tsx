@@ -1,9 +1,10 @@
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import { centsToDollars, dollarsToCents } from "@/utils/currency";
-import { faker } from "@faker-js/faker";
+import { appState$ } from "@/state/app";
+import { removeBill } from "@/state/crud";
+import { getNextBillDueDate } from "@/state/utils";
+import { centsToDollars, formatDollars } from "@/utils/currency";
+import { use$ } from "@legendapp/state/react";
 import { Stack, useRouter } from "expo-router";
-import { useState } from "react";
-import { View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import {
@@ -20,80 +21,11 @@ import {
   useTheme,
 } from "react-native-orchard";
 
-type Bill = {
-  id: string;
-  name: string;
-  amount: number;
-  dueDate: string;
-};
-
-// Generate 20 fake bills
-const mockBills: Bill[] = Array.from({ length: 20 }, () => ({
-  id: faker.string.uuid(),
-  name: faker.helpers.arrayElement([
-    "Rent",
-    "Electricity",
-    "Internet",
-    "Water",
-    "Gas",
-    "Phone",
-    "Car Insurance",
-    "Health Insurance",
-    "Gym Membership",
-    "Netflix",
-    "Spotify",
-    "Amazon Prime",
-    "Car Payment",
-    "Student Loan",
-    "Credit Card",
-  ]),
-  amount: dollarsToCents(faker.number.int({ min: 20, max: 2000 })),
-  dueDate: faker.date.future().toISOString().split("T")[0],
-}));
-
-// Sort bills by due date
-mockBills.sort(
-  (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
-);
-
 export default function BillsScreen() {
   const { colors } = useTheme();
   const router = useRouter();
-  const [bills, setBills] = useState<Bill[]>(mockBills);
 
-  const deleteBill = (bill: Bill) => {
-    setBills((currentBills) => currentBills.filter((b) => b.id !== bill.id));
-  };
-
-  // const addBill = () => {
-  //   const newBill: Bill = {
-  //     id: faker.string.uuid(),
-  //     name: faker.helpers.arrayElement([
-  //       "Rent",
-  //       "Electricity",
-  //       "Internet",
-  //       "Water",
-  //       "Gas",
-  //       "Phone",
-  //       "Car Insurance",
-  //       "Health Insurance",
-  //       "Gym Membership",
-  //       "Netflix",
-  //       "Spotify",
-  //       "Amazon Prime",
-  //       "Car Payment",
-  //       "Student Loan",
-  //       "Credit Card",
-  //     ]),
-  //     amount: dollarsToCents(faker.number.int({ min: 20, max: 2000 })),
-  //     dueDate: faker.date.future().toISOString().split("T")[0],
-  //   };
-  //   setBills((currentBills) =>
-  //     [...currentBills, newBill].sort(
-  //       (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
-  //     )
-  //   );
-  // };
+  const bills = use$(appState$.bills);
 
   return (
     <>
@@ -112,85 +44,76 @@ export default function BillsScreen() {
           ),
         }}
       />
-      <View
+      <ScrollView
         style={{
           flex: 1,
+          position: "relative",
+        }}
+        contentContainerStyle={{
+          paddingTop: spacing.lg,
+          // please adjust this to add padding based on the height of the tab bar
+          // this is a hacky way to do it, but it works for now
+          paddingBottom: 100,
         }}
       >
-        <ScrollView
-          style={{
-            flex: 1,
-            position: "relative",
-          }}
-          contentContainerStyle={{
-            marginTop: spacing.lg,
-            // please adjust this to add padding based on the height of the tab bar
-            // this is a hacky way to do it, but it works for now
-            paddingBottom: 100,
-          }}
-        >
-          <ListContainer>
-            <SectionContainer>
-              <SectionContent>
-                {bills.map((bill) => (
-                  <Swipeable
-                    key={bill.id}
-                    overshootRight={false}
-                    overshootLeft={false}
-                    renderRightActions={(prog, drag, actions) => (
-                      <PressableOpacity
-                        onPress={() => {
-                          actions.close();
-                          deleteBill(bill);
-                        }}
-                        style={{
-                          backgroundColor: colors.red,
-                          justifyContent: "center",
-                          paddingHorizontal: spacing.lg,
-                        }}
-                      >
-                        <Typography
-                          variant="bodyRegular"
-                          color="white"
-                          style={{ fontWeight: "500" }}
-                        >
-                          Delete
-                        </Typography>
-                      </PressableOpacity>
-                    )}
-                  >
+        <ListContainer>
+          <SectionContainer>
+            <SectionContent>
+              {bills.map((bill) => (
+                <Swipeable
+                  key={bill.id}
+                  overshootRight={false}
+                  overshootLeft={false}
+                  renderRightActions={(prog, drag, actions) => (
                     <PressableOpacity
-                      onPress={() => router.push(`/bills/${bill.id}`)}
+                      onPress={() => {
+                        actions.close();
+                        removeBill(bill.id);
+                      }}
+                      style={{
+                        backgroundColor: colors.red,
+                        justifyContent: "center",
+                        paddingHorizontal: spacing.lg,
+                      }}
                     >
-                      <RowContainer rounded={false}>
-                        <RowContent>
-                          <RowLabel variant="title">{bill.name}</RowLabel>
-                          <RowLabel variant="subtitle">
-                            Due {new Date(bill.dueDate).toLocaleDateString()}
-                          </RowLabel>
-                        </RowContent>
-                        <RowTrailing>
-                          <Typography
-                            variant="bodyRegular"
-                            color="labelPrimary"
-                          >
-                            {centsToDollars(bill.amount)}
-                          </Typography>
-                          <IconSymbol
-                            name="chevron.right"
-                            size={16}
-                            color={colors.labelSecondary}
-                          />
-                        </RowTrailing>
-                      </RowContainer>
+                      <Typography
+                        variant="bodyRegular"
+                        color="white"
+                        style={{ fontWeight: "500" }}
+                      >
+                        Delete
+                      </Typography>
                     </PressableOpacity>
-                  </Swipeable>
-                ))}
-              </SectionContent>
-            </SectionContainer>
-          </ListContainer>
-        </ScrollView>
-      </View>
+                  )}
+                >
+                  <PressableOpacity
+                    onPress={() => router.push(`/bills/${bill.id}`)}
+                  >
+                    <RowContainer rounded={false}>
+                      <RowContent>
+                        <RowLabel variant="title">{bill.name}</RowLabel>
+                        <RowLabel variant="subtitle">
+                          Due {getNextBillDueDate(bill).toLocaleDateString()}
+                        </RowLabel>
+                      </RowContent>
+                      <RowTrailing>
+                        <Typography variant="bodyRegular" color="labelPrimary">
+                          {formatDollars(centsToDollars(bill.amount))}
+                        </Typography>
+                        <IconSymbol
+                          name="chevron.right"
+                          size={16}
+                          color={colors.labelSecondary}
+                        />
+                      </RowTrailing>
+                    </RowContainer>
+                  </PressableOpacity>
+                </Swipeable>
+              ))}
+            </SectionContent>
+          </SectionContainer>
+        </ListContainer>
+      </ScrollView>
     </>
   );
 }

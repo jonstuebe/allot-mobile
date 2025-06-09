@@ -10,13 +10,10 @@ export function dollarsToCents(dollars: number): number {
 /**
  * Converts cents to a formatted dollar string
  * @param cents The amount in cents
- * @returns A formatted string with the dollar amount (e.g., "$1,234.56")
+ * @returns The amount in dollars as a number
  */
-export function centsToDollars(cents: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(cents / 100);
+export function centsToDollars(cents: number): number {
+  return cents / 100;
 }
 
 /**
