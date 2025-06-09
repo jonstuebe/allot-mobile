@@ -5,6 +5,7 @@ import { getNextBillDueDate } from "@/state/utils";
 import { centsToDollars, formatDollars } from "@/utils/currency";
 import { use$ } from "@legendapp/state/react";
 import { Stack, useRouter } from "expo-router";
+import { Alert } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import {
@@ -68,7 +69,23 @@ export default function BillsScreen() {
                     <PressableOpacity
                       onPress={() => {
                         actions.close();
-                        removeBill(bill.id);
+                        Alert.alert(
+                          "Delete Bill",
+                          "Are you sure you want to delete this bill?",
+                          [
+                            {
+                              text: "Cancel",
+                              style: "cancel",
+                            },
+                            {
+                              text: "Delete",
+                              style: "destructive",
+                              onPress: () => {
+                                removeBill(bill.id);
+                              },
+                            },
+                          ]
+                        );
                       }}
                       style={{
                         backgroundColor: colors.red,
