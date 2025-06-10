@@ -107,6 +107,9 @@ export function BillForm({
                     onBlur={onBlur}
                     keyboardType="decimal-pad"
                     value={value}
+                    style={{
+                      fontSize: 16,
+                    }}
                   />
                 )}
               />

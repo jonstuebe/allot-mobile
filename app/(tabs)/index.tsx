@@ -4,6 +4,7 @@ import { appState$ } from "@/state/app";
 import { removeBill } from "@/state/crud";
 import { getNextBillDueDate } from "@/state/utils";
 import { centsToDollars, formatDollars } from "@/utils/currency";
+import { importBills } from "@/utils/import";
 import { use$ } from "@legendapp/state/react";
 import { Stack, useRouter } from "expo-router";
 import { Alert } from "react-native";
@@ -34,6 +35,17 @@ export default function BillsScreen() {
       <Stack.Screen
         options={{
           title: "Bills",
+          headerLeft: () => (
+            <HeaderActions>
+              <PressableOpacity onPress={importBills}>
+                <IconSymbol
+                  name="square.and.arrow.down"
+                  size={24}
+                  color={colors.blue}
+                />
+              </PressableOpacity>
+            </HeaderActions>
+          ),
           headerRight: () => (
             <HeaderActions>
               <PressableOpacity onPress={() => router.push("/bills/new")}>

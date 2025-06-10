@@ -35,8 +35,10 @@ export function addPaycheck(paycheck: Omit<Paycheck, "id" | "bills">) {
   appState$.paychecks.push({
     ...paycheck,
     id: uuid,
-    bills: getPaycheckBills({ ...paycheck, id: uuid }, appState$.bills.get()),
+    bills: getPaycheckBills({ ...paycheck, id: uuid }, appState$.bills.peek()),
   });
+
+  return uuid;
 }
 
 export function removePaycheck(id: string) {

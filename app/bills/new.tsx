@@ -18,10 +18,8 @@ export default function NewBill() {
       autoPay: data.autoPay,
       due: {
         type: data.dueEvery,
-        index:
-          data.dueEvery === "monthly"
-            ? getDate(data.dueDate)
-            : getDayOfYear(data.dueDate),
+        dayOfMonth: data.dueEvery === "monthly" ? getDate(data.dueDate) : 0,
+        dayOfYear: data.dueEvery === "yearly" ? getDayOfYear(data.dueDate) : 0,
       },
     });
     navigation.goBack();

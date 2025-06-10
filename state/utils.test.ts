@@ -1,56 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { getNextBillDueDate, isMatchingBill } from "./utils";
+import { getNextBillDueDate } from "./utils";
 
 function date(year: number, month: number, day: number) {
   return new Date(year, month - 1, day);
 }
 
-describe("isMatchingBill", () => {
-  test("should return true if the bill is due on the paycheck date (monthly)", () => {
-    expect(
-      isMatchingBill(
-        {
-          id: "1",
-          name: "Test Bill",
-          amount: 1_995,
-          due: { type: "monthly", dayOfMonth: 1 } as const,
-          autoPay: false,
-        },
-        {
-          id: "1",
-          dateReceived: new Date("2024-01-01"),
-          nextPaycheckDate: new Date("2024-01-15"),
-          amount: 200_000,
-          bills: [],
-        }
-      )
-    ).toBe(true);
-  });
-
-  test("should return true if the bill is due on the paycheck date (yearly)", () => {
-    expect(
-      isMatchingBill(
-        {
-          id: "1",
-          name: "Test Bill",
-          amount: 1_995,
-          due: { type: "yearly", dayOfYear: 12 } as const,
-          autoPay: false,
-        },
-        {
-          id: "1",
-          dateReceived: new Date("2024-01-01"),
-          nextPaycheckDate: new Date("2024-01-15"),
-          amount: 200_000,
-          bills: [],
-        }
-      )
-    ).toBe(true);
-  });
-});
-
 describe("getNextBillDueDate", () => {
-  test("should return the next due date of a bill (monthly)", () => {
+  test("monthly", () => {
     expect(
       getNextBillDueDate(
         {
@@ -63,8 +19,24 @@ describe("getNextBillDueDate", () => {
         date(2024, 1, 15)
       )
     ).toEqual(date(2024, 2, 6));
+  });
 
-    // leap year test
+  test("if month doesn't have the proper amount of days", () => {
+    expect(
+      getNextBillDueDate(
+        {
+          id: "1",
+          name: "Test Bill",
+          amount: 1_995,
+          due: { type: "monthly", dayOfMonth: 31 } as const,
+          autoPay: false,
+        },
+        date(2024, 2, 15)
+      )
+    ).toEqual(date(2024, 2, 29));
+  });
+
+  test("monthly (leap year)", () => {
     expect(
       getNextBillDueDate(
         {
@@ -76,10 +48,10 @@ describe("getNextBillDueDate", () => {
         },
         date(2024, 2, 1)
       )
-    ).toEqual(date(2024, 3, 29));
+    ).toEqual(date(2024, 2, 29));
   });
 
-  test("should return the next due date of a bill (yearly)", () => {
+  test("yearly", () => {
     expect(
       getNextBillDueDate(
         {
@@ -92,7 +64,9 @@ describe("getNextBillDueDate", () => {
         date(2024, 5, 1)
       )
     ).toEqual(date(2025, 1, 25));
+  });
 
+  test("yearly (leap year)", () => {
     expect(
       getNextBillDueDate(
         {

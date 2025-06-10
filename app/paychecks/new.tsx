@@ -32,13 +32,7 @@ export default function NewPaycheck() {
   const { spacing } = useTheme();
   const router = useRouter();
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    setValue,
-  } = useForm({
+  const { control, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
       amount: "",
       dateReceived: new Date(),
@@ -47,12 +41,13 @@ export default function NewPaycheck() {
   });
 
   const onSubmit = handleSubmit((data) => {
-    addPaycheck({
+    const id = addPaycheck({
       amount: dollarsToCents(Number(data.amount)),
       dateReceived: data.dateReceived,
       nextPaycheckDate: data.nextPaycheckDate,
     });
-    router.dismiss();
+    router.dismissAll();
+    router.navigate(`/paychecks/${id}`);
   });
 
   const data = watch();
@@ -67,7 +62,6 @@ export default function NewPaycheck() {
       curBills
     );
   }, [data, curBills]);
-  console.log("paycheckBills", paycheckBills);
 
   return (
     <>
@@ -84,6 +78,7 @@ export default function NewPaycheck() {
                 <Controller
                   control={control}
                   name="amount"
+                  rules={{ required: true }}
                   render={({ field: { onChange, onBlur, value } }) => (
                     <RowTextInput
                       placeholder="Enter Amount"
@@ -161,9 +156,11 @@ export default function NewPaycheck() {
               <RowLabel>Bills</RowLabel>
               <RowTrailing>
                 <Typography color="labelPrimary">
-                  {formatDollars(
-                    centsToDollars(sumBy(paycheckBills, "amount"))
-                  )}
+                  {data.amount === ""
+                    ? "-"
+                    : formatDollars(
+                        centsToDollars(sumBy(paycheckBills, "amount"))
+                      )}
                 </Typography>
               </RowTrailing>
             </RowContainer>
@@ -171,12 +168,14 @@ export default function NewPaycheck() {
               <RowLabel>Remainder</RowLabel>
               <RowTrailing>
                 <Typography color="labelPrimary">
-                  {formatDollars(
-                    centsToDollars(
-                      dollarsToCents(Number(data.amount)) -
-                        sumBy(paycheckBills, "amount")
-                    )
-                  )}
+                  {data.amount === ""
+                    ? "-"
+                    : formatDollars(
+                        centsToDollars(
+                          dollarsToCents(Number(data.amount)) -
+                            sumBy(paycheckBills, "amount")
+                        )
+                      )}
                 </Typography>
               </RowTrailing>
             </RowContainer>

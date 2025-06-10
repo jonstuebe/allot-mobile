@@ -19,13 +19,16 @@ export default function BillPage() {
       name: data.name,
       amount: dollarsToCents(data.amount),
       autoPay: data.autoPay,
-      due: {
-        type: data.dueEvery,
-        index:
-          data.dueEvery === "monthly"
-            ? getDate(data.dueDate)
-            : getDayOfYear(data.dueDate),
-      },
+      due:
+        data.dueEvery === "monthly"
+          ? {
+              type: "monthly",
+              dayOfMonth: getDate(data.dueDate),
+            }
+          : {
+              type: "yearly",
+              dayOfYear: getDayOfYear(data.dueDate),
+            },
     });
     navigation.goBack();
   };
@@ -50,8 +53,8 @@ export default function BillPage() {
             dueEvery: bill.due.type,
             dueDate:
               bill.due.type === "monthly"
-                ? setDate(new Date(), bill.due.index)
-                : setDayOfYear(new Date(), bill.due.index),
+                ? setDate(new Date(), bill.due.dayOfMonth)
+                : setDayOfYear(new Date(), bill.due.dayOfYear),
           }}
           onSubmit={onSubmit}
           submitLabel="Save"

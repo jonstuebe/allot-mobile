@@ -4,8 +4,9 @@ import {
   getDaysInMonth,
   getDaysInYear,
   isAfter,
+  isEqual,
   isWithinInterval,
-  setDate,
+  setDate as setDayOfMonth,
   setDayOfYear,
 } from "date-fns";
 import * as Crypto from "expo-crypto";
@@ -21,39 +22,19 @@ import type { Bill, OptionalKeys, Paycheck } from "./types";
 export function getNextBillDueDate(bill: Bill, date = new Date()): Date {
   switch (bill.due.type) {
     case "monthly":
-      // Helper function to get a valid due date for a given month
-      const getValidDueDateForMonth = (baseDate: Date): Date => {
-        const daysInMonth = getDaysInMonth(baseDate);
-        const adjustedDay = Math.min(
-          (bill.due as { type: "monthly"; dayOfMonth: number }).dayOfMonth,
-          daysInMonth
-        );
-        return setDate(baseDate, adjustedDay);
-      };
-
-      // Helper function to check if we should skip February for high day numbers
-      const shouldSkipFebruary = (date: Date): boolean => {
-        return (
-          date.getMonth() === 1 &&
-          (bill.due as { type: "monthly"; dayOfMonth: number }).dayOfMonth > 28
-        ); // February is month 1 (0-indexed)
-      };
-
-      // Try the current month first, unless it's February and dayOfMonth > 28
-      if (!shouldSkipFebruary(date)) {
-        const currentMonthDueDate = getValidDueDateForMonth(date);
-        if (isAfter(currentMonthDueDate, date)) {
-          return currentMonthDueDate;
-        }
+      const daysInMonth = getDaysInMonth(date);
+      let billDueDayOfMonth = bill.due.dayOfMonth;
+      if (billDueDayOfMonth > daysInMonth) {
+        billDueDayOfMonth = daysInMonth;
       }
 
-      // Move to next month(s) until we find a suitable month
-      let nextMonth = addMonths(date, 1);
-      while (shouldSkipFebruary(nextMonth)) {
-        nextMonth = addMonths(nextMonth, 1);
+      const dueDate = setDayOfMonth(date, billDueDayOfMonth);
+
+      if (isEqual(dueDate, date) || isAfter(dueDate, date)) {
+        return dueDate;
       }
 
-      return getValidDueDateForMonth(nextMonth);
+      return addMonths(dueDate, 1);
     case "yearly":
       const nextYear = addYears(date, 1);
       const daysInNextYear = getDaysInYear(nextYear);
@@ -79,8 +60,6 @@ export function isMatchingBill(
   paycheck: OptionalKeys<Paycheck, "id" | "bills">
 ): boolean {
   const dueDate = getNextBillDueDate(bill, paycheck.dateReceived);
-
-  console.log("bill.name", bill.name, dueDate);
 
   if (!dueDate) {
     return false;

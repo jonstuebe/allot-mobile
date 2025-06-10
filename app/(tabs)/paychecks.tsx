@@ -7,10 +7,11 @@ import { use$ } from "@legendapp/state/react";
 import { format } from "date-fns";
 import { Stack, useRouter } from "expo-router";
 import { groupBy } from "lodash-es";
-import { useMemo } from "react";
 import { Alert, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+
+import { importPaychecks } from "@/utils/import";
 import {
   ListContainer,
   PressableOpacity,
@@ -29,26 +30,42 @@ import {
 export default function PaychecksScreen() {
   const router = useRouter();
   const { colors } = useTheme();
-  const paychecks = use$(appState$.paychecks);
 
-  const groupedPaychecks = useMemo(() => {
+  const groupedPaychecks = use$(() => {
+    const paychecks = appState$.paychecks.get();
+
     const groups = groupBy(paychecks, (paycheck) => {
       return format(paycheck.dateReceived, "MMMM yyyy");
     });
 
-    return Object.entries(groups).sort((a, b) => {
-      return new Date(b[0]).getTime() - new Date(a[0]).getTime();
-    });
-  }, [paychecks]);
+    return Object.entries(groups)
+      .sort((a, b) => {
+        return new Date(b[0]).getTime() - new Date(a[0]).getTime();
+      })
+      .reverse();
+  });
 
   return (
     <>
       <Stack.Screen
         options={{
           title: "Paychecks",
+          headerLeft: () => (
+            <HeaderActions>
+              <PressableOpacity onPress={importPaychecks}>
+                <IconSymbol
+                  name="square.and.arrow.down"
+                  size={24}
+                  color={colors.blue}
+                />
+              </PressableOpacity>
+            </HeaderActions>
+          ),
           headerRight: () => (
             <HeaderActions>
-              <PressableOpacity onPress={() => router.push("/paychecks/new")}>
+              <PressableOpacity
+                onPress={() => router.navigate("/paychecks/new")}
+              >
                 <IconSymbol name="plus.circle" size={24} color={colors.blue} />
               </PressableOpacity>
             </HeaderActions>
@@ -119,7 +136,9 @@ export default function PaychecksScreen() {
                       )}
                     >
                       <PressableOpacity
-                        onPress={() => router.push(`/paychecks/${paycheck.id}`)}
+                        onPress={() =>
+                          router.navigate(`/paychecks/${paycheck.id}`)
+                        }
                       >
                         <RowContainer rounded={false}>
                           <RowContent>
