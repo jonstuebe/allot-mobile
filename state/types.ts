@@ -3,10 +3,9 @@ export interface Bill {
   name: string;
   amount: number;
   autoPay: boolean;
-  due: {
-    type: "monthly" | "yearly";
-    index: number;
-  };
+  due:
+    | { type: "monthly"; dayOfMonth: number }
+    | { type: "yearly"; dayOfYear: number };
 }
 
 export interface Paycheck {
@@ -16,3 +15,6 @@ export interface Paycheck {
   nextPaycheckDate: Date;
   bills: Bill[];
 }
+
+export type OptionalKeys<T, K extends keyof T> = Omit<T, K> &
+  Partial<Pick<T, K>>;

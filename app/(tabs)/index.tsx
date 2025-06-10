@@ -1,3 +1,4 @@
+import { HeaderActions } from "@/components/HeaderActions";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { appState$ } from "@/state/app";
 import { removeBill } from "@/state/crud";
@@ -34,14 +35,11 @@ export default function BillsScreen() {
         options={{
           title: "Bills",
           headerRight: () => (
-            <PressableOpacity
-              onPress={() => router.push("/bills/new")}
-              style={{
-                padding: spacing.lg,
-              }}
-            >
-              <IconSymbol name="plus.circle" size={24} color={colors.blue} />
-            </PressableOpacity>
+            <HeaderActions>
+              <PressableOpacity onPress={() => router.push("/bills/new")}>
+                <IconSymbol name="plus.circle" size={24} color={colors.blue} />
+              </PressableOpacity>
+            </HeaderActions>
           ),
         }}
       />

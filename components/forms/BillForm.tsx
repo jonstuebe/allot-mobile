@@ -86,6 +86,9 @@ export function BillForm({
                     onChangeText={onChange}
                     onBlur={onBlur}
                     value={value}
+                    style={{
+                      fontSize: 16,
+                    }}
                   />
                 )}
               />

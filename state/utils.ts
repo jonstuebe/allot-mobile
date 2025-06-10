@@ -3,49 +3,68 @@ import {
   addYears,
   getDaysInMonth,
   getDaysInYear,
+  isAfter,
   isWithinInterval,
   setDate,
   setDayOfYear,
 } from "date-fns";
 import * as Crypto from "expo-crypto";
 
-import type { Bill, Paycheck } from "./types";
+import type { Bill, OptionalKeys, Paycheck } from "./types";
 
 /**
- * Gets the next due date of a bill. Should only used outside of the context of a paycheck.
+ * Gets the next due date of a bill.
  *
  * @param bill - The bill to get the next due date for.
- * @returns The next due date of the bill. If the bill is not due on the given date, returns undefined.
+ * @returns The next due date of the bill.
  */
 export function getNextBillDueDate(bill: Bill, date = new Date()): Date {
   switch (bill.due.type) {
     case "monthly":
-      if (bill.due.index > getDaysInMonth(date)) {
-        return setDate(date, bill.due.index);
-      } else {
-        return addMonths(setDate(date, bill.due.index), 1);
-      }
-    case "yearly":
-      if (bill.due.index > getDaysInYear(date)) {
-        return setDayOfYear(date, bill.due.index);
-      } else {
-        return addYears(setDayOfYear(date, bill.due.index), 1);
-      }
-  }
-}
+      // Helper function to get a valid due date for a given month
+      const getValidDueDateForMonth = (baseDate: Date): Date => {
+        const daysInMonth = getDaysInMonth(baseDate);
+        const adjustedDay = Math.min(
+          (bill.due as { type: "monthly"; dayOfMonth: number }).dayOfMonth,
+          daysInMonth
+        );
+        return setDate(baseDate, adjustedDay);
+      };
 
-/**
- * Gets the due date of a bill for a given paycheck.
- *
- * @param bill - The bill to get the due date for.
- * @param paycheck - The paycheck to get the due date for.
- * @returns The due date of the bill for the given paycheck.
- */
-export function getBillDueDate(
-  bill: Bill,
-  paycheck: Paycheck
-): Date | undefined {
-  return getNextBillDueDate(bill, paycheck.dateReceived);
+      // Helper function to check if we should skip February for high day numbers
+      const shouldSkipFebruary = (date: Date): boolean => {
+        return (
+          date.getMonth() === 1 &&
+          (bill.due as { type: "monthly"; dayOfMonth: number }).dayOfMonth > 28
+        ); // February is month 1 (0-indexed)
+      };
+
+      // Try the current month first, unless it's February and dayOfMonth > 28
+      if (!shouldSkipFebruary(date)) {
+        const currentMonthDueDate = getValidDueDateForMonth(date);
+        if (isAfter(currentMonthDueDate, date)) {
+          return currentMonthDueDate;
+        }
+      }
+
+      // Move to next month(s) until we find a suitable month
+      let nextMonth = addMonths(date, 1);
+      while (shouldSkipFebruary(nextMonth)) {
+        nextMonth = addMonths(nextMonth, 1);
+      }
+
+      return getValidDueDateForMonth(nextMonth);
+    case "yearly":
+      const nextYear = addYears(date, 1);
+      const daysInNextYear = getDaysInYear(nextYear);
+      if (bill.due.dayOfYear > daysInNextYear) {
+        // If the day doesn't exist in the next year (e.g., Feb 29 in non-leap year),
+        // use the last day of the year
+        return setDayOfYear(nextYear, daysInNextYear);
+      }
+
+      return setDayOfYear(nextYear, bill.due.dayOfYear);
+  }
 }
 
 /**
@@ -55,8 +74,13 @@ export function getBillDueDate(
  * @param paycheck - The paycheck to check against.
  * @returns True if the bill is due during the duration of the paycheck.
  */
-export function isMatchingBill(bill: Bill, paycheck: Paycheck): boolean {
-  const dueDate = getBillDueDate(bill, paycheck);
+export function isMatchingBill(
+  bill: Bill,
+  paycheck: OptionalKeys<Paycheck, "id" | "bills">
+): boolean {
+  const dueDate = getNextBillDueDate(bill, paycheck.dateReceived);
+
+  console.log("bill.name", bill.name, dueDate);
 
   if (!dueDate) {
     return false;
@@ -68,10 +92,17 @@ export function isMatchingBill(bill: Bill, paycheck: Paycheck): boolean {
   });
 }
 
-export function getPaycheckBills(paycheck: Paycheck, bills: Bill[]): Bill[] {
+export function getPaycheckBills(
+  paycheck: OptionalKeys<Paycheck, "id" | "bills">,
+  bills: Bill[]
+): Bill[] {
   return bills.filter((bill) => isMatchingBill(bill, paycheck));
 }
 
 export function id(): string {
   return Crypto.randomUUID();
+}
+
+export function sumBy(collection: any[], key: string): number {
+  return collection.reduce((acc, item) => acc + item[key], 0);
 }

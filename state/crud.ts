@@ -29,13 +29,13 @@ export function updateBill(id: string, updates: Partial<Bill>) {
   );
 }
 
-export function addPaycheck(paycheck: Omit<Paycheck, "id">) {
+export function addPaycheck(paycheck: Omit<Paycheck, "id" | "bills">) {
   const uuid = id();
 
   appState$.paychecks.push({
     ...paycheck,
     id: uuid,
-    bills: getPaycheckBills({ ...paycheck, id: uuid }, appState$.bills.peek()),
+    bills: getPaycheckBills({ ...paycheck, id: uuid }, appState$.bills.get()),
   });
 }
 

@@ -26,7 +26,7 @@ export default function RootLayout() {
               presentation: "formSheet",
               animation: "slide_from_bottom",
               gestureDirection: "vertical",
-              sheetAllowedDetents: [0.5, 1],
+              sheetAllowedDetents: [0.45, 1],
               sheetInitialDetentIndex: 0,
               sheetGrabberVisible: true,
               sheetCornerRadius: 10,
@@ -35,12 +35,11 @@ export default function RootLayout() {
           <Stack.Screen
             name="paychecks/new"
             options={{
-              title: "New Paycheck",
-              headerShown: true,
-              presentation: "modal",
+              headerShown: false,
+              presentation: "formSheet",
               animation: "slide_from_bottom",
               gestureDirection: "vertical",
-              sheetAllowedDetents: [0.5, 1],
+              sheetAllowedDetents: [0.53, 1],
               sheetInitialDetentIndex: 0,
               sheetGrabberVisible: true,
               sheetCornerRadius: 10,

@@ -1,5 +1,7 @@
-import { centsToDollars } from "@/utils/currency";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { appState$ } from "@/state/app";
+import { centsToDollars, formatDollars } from "@/utils/currency";
+import { use$ } from "@legendapp/state/react";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { ScrollView } from "react-native-gesture-handler";
 import {
   ListContainer,
@@ -14,25 +16,29 @@ import {
 } from "react-native-orchard";
 
 export default function PaycheckDetailScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors } = useTheme();
+  const paycheck = use$(appState$.paychecks.get().find((p) => p.id === id));
 
-  // In a real app, you would fetch the paycheck data based on the ID
-  // For now, we'll use mock data
-  const paycheck = {
-    id,
-    amount: 500000, // $5,000.00
-    dateReceived: new Date().toISOString().split("T")[0],
-    nextPaycheckDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0],
-  };
+  if (!paycheck) {
+    return null;
+  }
 
   return (
     <>
       <Stack.Screen
         options={{
-          title: "Paycheck Details",
+          title: "",
+          headerBackTitle: "Paychecks",
+          // TODO: add a reload bills button
+          // headerRight: () => (
+          //   <HeaderActions>
+          //     <PressableOpacity onPress={() => router.push("/paychecks/new")}>
+          //       <IconSymbol name="plus.circle" size={24} color={colors.blue} />
+          //     </PressableOpacity>
+          //   </HeaderActions>
+          // ),
         }}
       />
       <ScrollView style={{ flex: 1 }}>
@@ -43,7 +49,7 @@ export default function PaycheckDetailScreen() {
                 <RowLabel>Amount</RowLabel>
                 <RowTrailing>
                   <Typography variant="bodyRegular" color="labelPrimary">
-                    {centsToDollars(paycheck.amount)}
+                    {formatDollars(centsToDollars(paycheck.amount))}
                   </Typography>
                 </RowTrailing>
               </RowContainer>
