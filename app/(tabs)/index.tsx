@@ -35,20 +35,12 @@ export default function BillsScreen() {
       <Stack.Screen
         options={{
           title: "Bills",
-          headerLeft: () => (
-            <HeaderActions>
-              <PressableOpacity onPress={importBills}>
-                <IconSymbol
-                  name="square.and.arrow.down"
-                  size={24}
-                  color={colors.blue}
-                />
-              </PressableOpacity>
-            </HeaderActions>
-          ),
           headerRight: () => (
             <HeaderActions>
-              <PressableOpacity onPress={() => router.push("/bills/new")}>
+              <PressableOpacity
+                onPress={() => router.push("/bills/new")}
+                onLongPress={importBills}
+              >
                 <IconSymbol name="plus.circle" size={24} color={colors.blue} />
               </PressableOpacity>
             </HeaderActions>

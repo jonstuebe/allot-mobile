@@ -3,6 +3,7 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import { appState$ } from "@/state/app";
 import { removePaycheck } from "@/state/crud";
 import { centsToDollars, formatDollars } from "@/utils/currency";
+import { importPaychecks } from "@/utils/import";
 import { use$ } from "@legendapp/state/react";
 import { format } from "date-fns";
 import { Stack, useRouter } from "expo-router";
@@ -10,8 +11,6 @@ import { groupBy } from "lodash-es";
 import { Alert, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
-
-import { importPaychecks } from "@/utils/import";
 import {
   ListContainer,
   PressableOpacity,
@@ -50,21 +49,11 @@ export default function PaychecksScreen() {
       <Stack.Screen
         options={{
           title: "Paychecks",
-          headerLeft: () => (
-            <HeaderActions>
-              <PressableOpacity onPress={importPaychecks}>
-                <IconSymbol
-                  name="square.and.arrow.down"
-                  size={24}
-                  color={colors.blue}
-                />
-              </PressableOpacity>
-            </HeaderActions>
-          ),
           headerRight: () => (
             <HeaderActions>
               <PressableOpacity
                 onPress={() => router.navigate("/paychecks/new")}
+                onLongPress={importPaychecks}
               >
                 <IconSymbol name="plus.circle" size={24} color={colors.blue} />
               </PressableOpacity>
