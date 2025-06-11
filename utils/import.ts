@@ -1,5 +1,5 @@
 import * as DocumentPicker from "expo-document-picker";
-import * as FileSystem from "expo-file-system";
+import { File } from "expo-file-system/next";
 import Papa from "papaparse";
 import z from "zod";
 import { addBill, addPaycheck } from "../state/crud";
@@ -13,9 +13,9 @@ export async function importCSV<T>(schema: z.ZodSchema<T>): Promise<T | null> {
 
   try {
     if (result.assets && result.assets[0]) {
-      const file = await FileSystem.readAsStringAsync(result.assets[0].uri);
+      const file = new File(result.assets[0].uri);
 
-      const { data } = Papa.parse(file, {
+      const { data } = Papa.parse(file.text(), {
         header: true,
         skipEmptyLines: true,
       });

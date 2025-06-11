@@ -1,4 +1,3 @@
-import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
 import { ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -6,11 +5,8 @@ import { useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { theme } from "react-native-orchard/theme";
 
+import "expo-dev-client";
 import "react-native-reanimated";
-
-enableReactTracking({
-  warnMissingUse: true,
-});
 
 export default function RootLayout() {
   const mode = useColorScheme() ?? "light";
