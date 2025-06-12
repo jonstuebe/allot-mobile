@@ -51,6 +51,25 @@ export function removeBillFromPaycheck(paycheck: Paycheck, bill: Bill) {
   });
 }
 
+export function updatePaycheckBill(
+  paycheckId: string,
+  billId: string,
+  updates: Partial<Bill>
+) {
+  const paycheck = appState$.paychecks.get().find((p) => p.id === paycheckId);
+  if (!paycheck) return;
+
+  const bills = paycheck.bills.map((bill) => {
+    if (bill.id === billId) {
+      return { ...bill, ...updates };
+    }
+
+    return bill;
+  });
+
+  updatePaycheck(paycheckId, { bills });
+}
+
 export function removePaycheck(id: string) {
   appState$.paychecks.set(
     appState$.paychecks

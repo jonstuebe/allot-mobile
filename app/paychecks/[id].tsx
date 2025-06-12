@@ -33,7 +33,7 @@ import { refreshPaycheckBills, removeBillFromPaycheck } from "../../state/crud";
 
 export default function PaycheckDetailScreen() {
   const router = useRouter();
-  const { colors } = useTheme();
+  const { colors, typography } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const paycheck = use$(() =>
@@ -125,62 +125,72 @@ export default function PaycheckDetailScreen() {
             <SectionHeader>Bills</SectionHeader>
             <SectionContent>
               {paycheck.bills.map((bill, idx) => (
-                <Swipeable
-                  overshootRight={false}
-                  overshootLeft={false}
-                  renderRightActions={(prog, drag, actions) => (
-                    <PressableOpacity
-                      onPress={() => {
-                        actions.close();
-                        Alert.alert(
-                          "Delete Bill",
-                          "Are you sure you want to delete this bill?",
-                          [
-                            {
-                              text: "Cancel",
-                              style: "cancel",
-                            },
-                            {
-                              text: "Delete",
-                              style: "destructive",
-                              onPress: () => {
-                                removeBillFromPaycheck(paycheck, bill);
-                              },
-                            },
-                          ]
-                        );
-                      }}
-                      style={{
-                        backgroundColor: colors.red,
-                        justifyContent: "center",
-                        paddingHorizontal: spacing.lg,
-                      }}
-                    >
-                      <Typography
-                        variant="bodyRegular"
-                        color="white"
-                        style={{ fontWeight: "500" }}
-                      >
-                        Delete
-                      </Typography>
-                    </PressableOpacity>
-                  )}
+                <Link
                   key={idx}
+                  href={`/paychecks/${id}/bill/${bill.id}`}
+                  asChild
                 >
-                  <RowContainer rounded={false}>
-                    <RowContent>
-                      <RowLabel>{bill.name}</RowLabel>
-                      <RowLabel variant="subtitle">
-                        {format(getNextBillDueDate(bill), "MM/dd/yyyy")}
-                      </RowLabel>
-                    </RowContent>
-                    <RowTrailing>
-                      <Typography variant="bodyRegular" color="labelPrimary">
-                        {formatDollars(centsToDollars(bill.amount))}
-                      </Typography>
-                    </RowTrailing>
-                  </RowContainer>
-                </Swipeable>
+                  <PressableOpacity>
+                    <Swipeable
+                      overshootRight={false}
+                      overshootLeft={false}
+                      renderRightActions={(prog, drag, actions) => (
+                        <PressableOpacity
+                          onPress={() => {
+                            actions.close();
+                            Alert.alert(
+                              "Delete Bill",
+                              "Are you sure you want to delete this bill?",
+                              [
+                                {
+                                  text: "Cancel",
+                                  style: "cancel",
+                                },
+                                {
+                                  text: "Delete",
+                                  style: "destructive",
+                                  onPress: () => {
+                                    removeBillFromPaycheck(paycheck, bill);
+                                  },
+                                },
+                              ]
+                            );
+                          }}
+                          style={{
+                            backgroundColor: colors.red,
+                            justifyContent: "center",
+                            paddingHorizontal: spacing.lg,
+                          }}
+                        >
+                          <Typography
+                            variant="bodyRegular"
+                            color="white"
+                            style={{ fontWeight: "500" }}
+                          >
+                            Delete
+                          </Typography>
+                        </PressableOpacity>
+                      )}
+                    >
+                      <RowContainer rounded={false}>
+                        <RowContent>
+                          <RowLabel>{bill.name}</RowLabel>
+                          <RowLabel variant="subtitle">
+                            {format(getNextBillDueDate(bill), "MM/dd/yyyy")}
+                          </RowLabel>
+                        </RowContent>
+                        <RowTrailing>
+                          <Typography
+                            variant="bodyRegular"
+                            color="labelPrimary"
+                          >
+                            {formatDollars(centsToDollars(bill.amount))}
+                          </Typography>
+                        </RowTrailing>
+                      </RowContainer>
+                    </Swipeable>
+                  </PressableOpacity>
+                </Link>
               ))}
             </SectionContent>
           </SectionContainer>

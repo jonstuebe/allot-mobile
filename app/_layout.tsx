@@ -64,6 +64,19 @@ export default function RootLayout() {
               gestureDirection: "vertical",
             }}
           />
+          <Stack.Screen
+            name="paychecks/[id]/bill/[billId]"
+            options={{
+              headerShown: false,
+              presentation: "formSheet",
+              animation: "slide_from_bottom",
+              gestureDirection: "vertical",
+              sheetAllowedDetents: [0.45, 1],
+              sheetInitialDetentIndex: 0,
+              sheetGrabberVisible: true,
+              sheetCornerRadius: 10,
+            }}
+          />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />
