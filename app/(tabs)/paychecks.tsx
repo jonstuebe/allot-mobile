@@ -72,8 +72,7 @@ export default function PaychecksScreen() {
             position: "relative",
           }}
           contentContainerStyle={{
-            marginTop: spacing.lg,
-            paddingBottom: 100,
+            paddingVertical: spacing.lg,
           }}
         >
           <ListContainer>

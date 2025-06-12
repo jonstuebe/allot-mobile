@@ -1,11 +1,23 @@
+import { HeaderActions } from "@/components/HeaderActions";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 import { appState$ } from "@/state/app";
+import { getNextBillDueDate, sumBy } from "@/state/utils";
 import { centsToDollars, formatDollars } from "@/utils/currency";
 import { use$ } from "@legendapp/state/react";
 import { format } from "date-fns";
-import { Redirect, Stack, useLocalSearchParams, useRouter } from "expo-router";
+import {
+  Link,
+  Redirect,
+  Stack,
+  useLocalSearchParams,
+  useRouter,
+} from "expo-router";
+import { ActionSheetIOS, Alert } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import {
   ListContainer,
+  PressableOpacity,
   RowContainer,
   RowContent,
   RowLabel,
@@ -15,11 +27,13 @@ import {
   SectionHeader,
   Typography,
   spacing,
+  useTheme,
 } from "react-native-orchard";
-import { getNextBillDueDate, sumBy } from "../../state/utils";
+import { refreshPaycheckBills, removeBillFromPaycheck } from "../../state/crud";
 
 export default function PaycheckDetailScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const paycheck = use$(() =>
@@ -36,18 +50,48 @@ export default function PaycheckDetailScreen() {
         options={{
           title: "",
           headerBackTitle: "Paychecks",
-          // TODO: add a reload bills button
-          // headerRight: () => (
-          //   <HeaderActions>
-          //     <PressableOpacity onPress={() => router.push("/paychecks/new")}>
-          //       <IconSymbol name="plus.circle" size={24} color={colors.blue} />
-          //     </PressableOpacity>
-          //   </HeaderActions>
-          // ),
+          headerRight: () => (
+            <HeaderActions>
+              <PressableOpacity
+                onPress={() => {
+                  ActionSheetIOS.showActionSheetWithOptions(
+                    {
+                      title: "Refresh Bills",
+                      message: "Are you sure you want to refresh the bills?",
+                      options: ["Refresh", "Cancel"],
+                      cancelButtonIndex: 1,
+                      destructiveButtonIndex: 0,
+                    },
+                    (selectedIndex) => {
+                      if (selectedIndex === 0) {
+                        refreshPaycheckBills(paycheck);
+                      }
+                    }
+                  );
+                }}
+              >
+                <IconSymbol
+                  name="arrow.clockwise"
+                  size={24}
+                  color={colors.blue}
+                />
+              </PressableOpacity>
+              <Link href={`/paychecks/${id}/add`}>
+                <IconSymbol name="plus" size={24} color={colors.blue} />
+              </Link>
+            </HeaderActions>
+          ),
         }}
       />
-      <ScrollView style={{ flex: 1 }}>
-        <ListContainer style={{ marginTop: spacing.lg }}>
+      <ScrollView
+        style={{
+          flex: 1,
+        }}
+        contentContainerStyle={{
+          paddingVertical: spacing.lg,
+        }}
+      >
+        <ListContainer>
           <SectionContainer>
             <SectionHeader>Details</SectionHeader>
             <SectionContent>
@@ -81,19 +125,62 @@ export default function PaycheckDetailScreen() {
             <SectionHeader>Bills</SectionHeader>
             <SectionContent>
               {paycheck.bills.map((bill, idx) => (
-                <RowContainer key={idx}>
-                  <RowContent>
-                    <RowLabel>{bill.name}</RowLabel>
-                    <RowLabel variant="subtitle">
-                      {format(getNextBillDueDate(bill), "MM/dd/yyyy")}
-                    </RowLabel>
-                  </RowContent>
-                  <RowTrailing>
-                    <Typography variant="bodyRegular" color="labelPrimary">
-                      {formatDollars(centsToDollars(bill.amount))}
-                    </Typography>
-                  </RowTrailing>
-                </RowContainer>
+                <Swipeable
+                  overshootRight={false}
+                  overshootLeft={false}
+                  renderRightActions={(prog, drag, actions) => (
+                    <PressableOpacity
+                      onPress={() => {
+                        actions.close();
+                        Alert.alert(
+                          "Delete Bill",
+                          "Are you sure you want to delete this bill?",
+                          [
+                            {
+                              text: "Cancel",
+                              style: "cancel",
+                            },
+                            {
+                              text: "Delete",
+                              style: "destructive",
+                              onPress: () => {
+                                removeBillFromPaycheck(paycheck, bill);
+                              },
+                            },
+                          ]
+                        );
+                      }}
+                      style={{
+                        backgroundColor: colors.red,
+                        justifyContent: "center",
+                        paddingHorizontal: spacing.lg,
+                      }}
+                    >
+                      <Typography
+                        variant="bodyRegular"
+                        color="white"
+                        style={{ fontWeight: "500" }}
+                      >
+                        Delete
+                      </Typography>
+                    </PressableOpacity>
+                  )}
+                  key={idx}
+                >
+                  <RowContainer rounded={false}>
+                    <RowContent>
+                      <RowLabel>{bill.name}</RowLabel>
+                      <RowLabel variant="subtitle">
+                        {format(getNextBillDueDate(bill), "MM/dd/yyyy")}
+                      </RowLabel>
+                    </RowContent>
+                    <RowTrailing>
+                      <Typography variant="bodyRegular" color="labelPrimary">
+                        {formatDollars(centsToDollars(bill.amount))}
+                      </Typography>
+                    </RowTrailing>
+                  </RowContainer>
+                </Swipeable>
               ))}
             </SectionContent>
           </SectionContainer>

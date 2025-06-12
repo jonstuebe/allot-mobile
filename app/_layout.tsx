@@ -29,6 +29,13 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen
+            name="bills/[id]"
+            options={{
+              title: "Bill Details",
+              headerShown: true,
+            }}
+          />
+          <Stack.Screen
             name="paychecks/new"
             options={{
               headerShown: false,
@@ -49,10 +56,12 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen
-            name="bills/[id]"
+            name="paychecks/[id]/add"
             options={{
-              title: "Bill Details",
               headerShown: true,
+              presentation: "modal",
+              animation: "slide_from_bottom",
+              gestureDirection: "vertical",
             }}
           />
           <Stack.Screen name="+not-found" />

@@ -53,10 +53,7 @@ export default function BillsScreen() {
           position: "relative",
         }}
         contentContainerStyle={{
-          paddingTop: spacing.lg,
-          // please adjust this to add padding based on the height of the tab bar
-          // this is a hacky way to do it, but it works for now
-          paddingBottom: 100,
+          paddingVertical: spacing.lg,
         }}
       >
         <ListContainer>

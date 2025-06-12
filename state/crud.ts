@@ -41,6 +41,16 @@ export function addPaycheck(paycheck: Omit<Paycheck, "id" | "bills">) {
   return uuid;
 }
 
+export function addBillsToPaycheck(paycheck: Paycheck, bills: Bill[]) {
+  updatePaycheck(paycheck.id, { bills: [...paycheck.bills, ...bills] });
+}
+
+export function removeBillFromPaycheck(paycheck: Paycheck, bill: Bill) {
+  updatePaycheck(paycheck.id, {
+    bills: paycheck.bills.filter((b) => b.id !== bill.id),
+  });
+}
+
 export function removePaycheck(id: string) {
   appState$.paychecks.set(
     appState$.paychecks
