@@ -1,6 +1,9 @@
+import { HeaderActions } from "@/components/HeaderActions";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useSelectedItems } from "@/hooks/useSelectedItems";
 import { appState$ } from "@/state/app";
+import { addBillsToPaycheck } from "@/state/crud";
+import { centsToDollars, formatDollars } from "@/utils/currency";
 import { use$ } from "@legendapp/state/react";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { ScrollView } from "react-native";
@@ -12,10 +15,9 @@ import {
   RowTrailing,
   SectionContainer,
   SectionContent,
+  Typography,
   useTheme,
 } from "react-native-orchard";
-import { HeaderActions } from "../../../components/HeaderActions";
-import { addBillsToPaycheck } from "../../../state/crud";
 
 export default function AddBillScreen() {
   const { id } = useLocalSearchParams();
@@ -96,13 +98,19 @@ export default function AddBillScreen() {
                 >
                   <RowLabel>{bill.name}</RowLabel>
                   <RowTrailing>
-                    {isItemSelected(bill) ? (
-                      <IconSymbol
-                        name="checkmark"
-                        size={16}
-                        color={colors.blue}
-                      />
-                    ) : null}
+                    <Typography variant="bodyRegular" color="labelPrimary">
+                      {formatDollars(centsToDollars(bill.amount))}
+                    </Typography>
+
+                    <IconSymbol
+                      name={
+                        isItemSelected(bill)
+                          ? "checkmark.circle.fill"
+                          : "checkmark.circle"
+                      }
+                      size={20}
+                      color={colors.blue}
+                    />
                   </RowTrailing>
                 </PressableRowContainer>
               ))}

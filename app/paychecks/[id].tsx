@@ -5,13 +5,7 @@ import { getNextBillDueDate, sumBy } from "@/state/utils";
 import { centsToDollars, formatDollars } from "@/utils/currency";
 import { use$ } from "@legendapp/state/react";
 import { format } from "date-fns";
-import {
-  Link,
-  Redirect,
-  Stack,
-  useLocalSearchParams,
-  useRouter,
-} from "expo-router";
+import { Link, Redirect, Stack, useLocalSearchParams } from "expo-router";
 import { ActionSheetIOS, Alert } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
@@ -29,11 +23,12 @@ import {
   spacing,
   useTheme,
 } from "react-native-orchard";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { refreshPaycheckBills, removeBillFromPaycheck } from "../../state/crud";
 
 export default function PaycheckDetailScreen() {
-  const router = useRouter();
-  const { colors, typography } = useTheme();
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const paycheck = use$(() =>
@@ -88,7 +83,8 @@ export default function PaycheckDetailScreen() {
           flex: 1,
         }}
         contentContainerStyle={{
-          paddingVertical: spacing.lg,
+          paddingTop: spacing.lg,
+          paddingBottom: spacing.lg + insets.bottom,
         }}
       >
         <ListContainer>
